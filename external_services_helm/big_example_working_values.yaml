@@ -1,0 +1,369 @@
+global:
+  default_entrypoints:
+    - websecure   # define your default entrypoints here
+    - web
+
+certificates:
+  - name: centerionware-default
+    secretName: centerionware-default
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: centerionware.com
+    dnsNames:
+      - centerionware.com
+      - '*.centerionware.com'
+  - name: centerionware-pages-default
+    secretName: centerionware-pages-default
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: centerionware.com
+    dnsNames:
+      - centerionware.com
+      - '*.centerionware.com'
+      - "*.pages.centerionware.com"
+  - name: registery-centerionware
+    secretName: registery-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: registry.gitlab.centerionware.com
+    dnsNames:
+      - registry.gitlab.centerionware.com
+      - '*.registry.gitlab.centerionware.com'
+
+ingressRoutes:
+  - name: ai-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`ai.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: ai-centerionware-com-service
+            externalName: ai-agent-text.centerionware.lan
+            port: 3000
+            targetPort: 3000
+            scheme: http
+        middlewares:
+          - authentik
+      - kind: Rule
+        match: >-
+          Host(`ai.centerionware.com`) && PathPrefix(`/outpost.goauthentik.io/`)
+        services:
+          - name: auth-forward
+            externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
+            port: 9000
+            targetPort: 9000
+  - name: ceph-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`ceph.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: pve-ceph-centerionware-com-service
+            externalName: pve.centerionware.lan
+            port: 8080
+            targetPort: 8080
+            scheme: http
+        middlewares:
+          - authentik
+      - kind: Rule
+        match: >-
+          Host(`ceph.centerionware.com`) && PathPrefix(`/outpost.goauthentik.io/`)
+        services:
+          - name: auth-forward
+            externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
+            port: 9000
+            targetPort: 9000
+  - name: centerionware-ingress
+    tls:
+      secretName: centerionware-pages-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+            - "*.pages.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+           Host(`centerionware.com`)
+        services:
+          - kind: Service
+            name: centerionware-service
+            externalName: gitlab.centerionware.lan
+            port: 801
+            scheme: http
+            passHostHeader: true
+        middlewares:
+          - alpine-runner-redirectregex
+          - build-runner-redirectregex
+          - cloud-runner-redirectregex
+          - sixcloud-runner-redirectregex
+          - kiosk-redirectregex
+          - notes-redirectregex
+          - onboarding-redirectregex
+          - runner-redirectregex
+          - sshkey-redirectregex
+          - www-redirectregex
+          - helpdesk-redirectregex
+      - kind: Rule
+        match: >-
+           HostRegexp(`(?i)^(alpine|build|sixcloud|cloud)(-(runner|www|kiosk|notes|onboarding|helpdesk|sshkey))?\.centerionware\.com$`)
+        services:
+          - kind: Service
+            name: centerionware-service
+            externalName: gitlab.centerionware.lan
+            port: 801
+            scheme: http
+            passHostHeader: false
+        middlewares:
+          - alpine-runner-redirectregex
+          - build-runner-redirectregex
+          - cloud-runner-redirectregex
+          - sixcloud-runner-redirectregex
+          - kiosk-redirectregex
+          - notes-redirectregex
+          - onboarding-redirectregex
+          - runner-redirectregex
+          - sshkey-redirectregex
+          - www-redirectregex
+          - helpdesk-redirectregex
+      - kind: Rule
+        match: >-
+          HostRegexp(`(?i)^([^.]+)\.pages\.centerionware\.com$`)
+        services:
+          - kind: Service
+            name: centerionware-service
+            externalName: gitlab.centerionware.lan
+            port: 801
+            scheme: http
+            passHostHeader: true
+  - name: dns-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`dns.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: dnshome-centerionware-com-service
+            externalName: dnshome.centerionware.lan
+            port: 10000
+            targetPort: 10000
+            scheme: http
+        middlewares:
+          - authentik
+      - kind: Rule
+        match: >-
+          Host(`dns.centerionware.com`) && PathPrefix(`/outpost.goauthentik.io/`)
+        services:
+          - name: auth-forward
+            externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
+            port: 9000
+            targetPort: 9000
+  - name: gitlab-mattermost-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`gitlab.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: gitlab-centerionware-com-service
+            externalName: gitlab-internal.centerionware.com
+            port: 443
+            targetPort: 443
+            scheme: https
+        middlewares: []
+      - kind: Rule
+        match: Host(`mattermost.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: gitlab-centerionware-com-service
+            externalName: gitlab-internal.centerionware.com
+            port: 443
+            targetPort: 443
+            scheme: https
+        middlewares: []
+  - name: registries-gitlab-centerionware-com-ingressroute
+    tls:
+      secretName: registery-centerionware
+      domains:
+        - main: "registry.gitlab.centerionware.com"
+          sans:
+            - "registry.gitlab.centerionware.com"
+            - "*.registry.gitlab.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`gitlab.registry.gitlab.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: gitlab-centerionware-com-service
+            externalName: gitlab-internal.centerionware.com
+            port: 6001
+            targetPort: 6001
+            scheme: http
+        middlewares: []
+      - kind: Rule
+        match: >-
+          Host(`dockerhub.registry.gitlab.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: gitlab-centerionware-com-service
+            externalName: gitlab-internal.centerionware.com
+            port: 6000
+            targetPort: 6000
+            scheme: http
+        middlewares: []
+      - kind: Rule
+        match: >-
+          Host(`registry.gitlab.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: gitlab-centerionware-com-service
+            externalName: gitlab-internal.centerionware.com
+            port: 5000
+            targetPort: 5000
+            scheme: http
+        middlewares: []
+
+
+middlewares:
+  - name: resume-auth
+    spec:
+      basicAuth:
+        secret: resume-secret
+
+  - name: alpine-runner-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://alpine-runner.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/alpine-runner.sh"
+
+  - name: build-runner-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://build-runner.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/build-runner.sh"
+
+  - name: cloud-runner-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://cloud-runner.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/cloud-runner.sh"
+
+  - name: sixcloud-runner-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://sixcloud-runner.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/cloud-runner6.sh"
+
+  - name: kiosk-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://kiosk.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/kiosk.sh"
+
+  - name: notes-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://notes.centerionware.com"
+        replacement: "https://nextcloud.centerionware.com/index.php/apps/notes"
+
+  - name: www-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://www.centerionware.com"
+        replacement: "https://centerionware.com"
+
+  - name: onboarding-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://onboarding.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/init.sh"
+
+  - name: runner-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://runner.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/runner.sh"
+
+  - name: sshkey-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://sshkey.centerionware.com"
+        replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/ssh_key"
+
+  - name: helpdesk-redirectregex
+    spec:
+      redirectRegex:
+        regex: "^https://helpdesk.centerionware.com"
+        replacement: "https://zammad.helpdesk.centerionware.com"
+  - name: search-xng-search-centerionware-com-general-security
+    spec:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        referrerPolicy: "no-referrer"
+
+  - name: search-xng-search-centerionware-com-searxng-headers
+    spec:
+      headers:
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, noarchive, nofollow"
+          Content-Security-Policy: >-
+            upgrade-insecure-requests; default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self' https://github.com/searxng/searxng/issues/new; font-src 'self'; frame-ancestors 'self'; base-uri 'self'; connect-src 'self' https://overpass-api.de; img-src 'self' data: https://*.tile.openstreetmap.org; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com https://www.deezer.com https://www.mixcloud.com https://w.soundcloud.com https://embed.spotify.com"
+          Permissions-Policy: >-
+            accelerometer=(),ambient-light-sensor=(),autoplay=(),camera=(),encrypted-media=(),focus-without-user-activation=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),speaker=(),sync-xhr=(),usb=(),vr=()
+
+  - name: authentik
+    spec:
+      forwardAuth:
+        address: "http://ak-outpost-all-proxy-outpost.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - X-authentik-username
+          - X-authentik-groups
+          - X-authentik-entitlements
+          - X-authentik-email
+          - X-authentik-name
+          - X-authentik-uid
+          - X-authentik-jwt
+          - X-authentik-meta-jwks
+          - X-authentik-meta-outpost
+          - X-authentik-meta-provider
+          - X-authentik-meta-app
+          - X-authentik-meta-version
