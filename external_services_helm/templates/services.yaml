@@ -62,7 +62,7 @@ spec:
   externalName: {{ $svc.externalName }}
   ports:
     {{- range $svc.ports }}
-    - name: {{ .name | trunc 15 | trimSuffix "-" | lower }}  # Kubernetes port names max 15 chars, no trailing dash
+    - name: {{ .name | trimSuffix "-" | lower }}  # Kubernetes port names max 15 chars, no trailing dash
       port: {{ .port }}
       targetPort: {{ .targetPort }}
     {{- end }}
