@@ -1,6 +1,4 @@
 {{- $services := dict -}}
-
-{{- /* Helper to add service port */ -}}
 {{- define "addPort" -}}
   {{- $svcMap := index . 0 -}}
   {{- $ns := index . 1 -}}
