@@ -28,7 +28,7 @@ spec:
           passHostHeader: true
           {{- end }}
           {{- if .insecureSkipVerify }}
-          serversTransport: {{ printf "%s-transport-%s" .name $.Release.Namespace }}@kubernetescrd
+          serversTransport: {{ printf "%s-%s-transport" $.Release.Namespace .name  }}@kubernetescrd
           {{- end }}
           scheme: {{ default "http" .scheme }}
       {{- end }}
