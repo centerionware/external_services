@@ -68,7 +68,7 @@ kind: Service
 metadata:
   {{- if $svc.insecureSkipVerify }}
   annotations:
-    traefik.ingress.kubernetes.io/service.serverstransport: {{ $svc.namespace }}-{{ $svc.namespace }}-insecureSkipVerify@kubernetescrd
+    traefik.ingress.kubernetes.io/service.serverstransport: {{ $svc.namespace }}-{{ $svc.namespace }}-insecureskipverify@kubernetescrd
   {{- end }}
   name: {{ $svc.name }}
   namespace: {{ $svc.namespace }}

@@ -11,7 +11,7 @@
     {{- end }}
   {{- end }}
   {{- if $needsTransport }}
-    {{- $tname := printf "%s-insecureSkipVerify" $ns }}
+    {{- $tname := printf "%s-insecureskipverify" $ns }}
     {{- if not (hasKey $transports $tname) }}
       {{- $_ := set $transports $tname (dict "name" $tname "namespace" $ns "insecureSkipVerify" true) }}
     {{- end }}
