@@ -1,4 +1,6 @@
 {{- $services := dict -}}
+
+{{- /* Helper to add service port */ -}}
 {{- define "addPort" -}}
   {{- $svcMap := index . 0 -}}
   {{- $ns := index . 1 -}}
@@ -31,9 +33,7 @@
   {{- $ns := default $.Release.Namespace .namespace }}
   {{- range .routes }}
     {{- range .services }}
-      {{- if eq .type "ExternalName" }}
         {{- include "addPort" (list $services $ns .) }}
-      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -42,20 +42,10 @@
 {{- range .Values.classicIngresses }}
   {{- $ns := default $.Release.Namespace .namespace }}
   {{- range .services }}
-    {{- if eq .type "ExternalName" }}
       {{- include "addPort" (list $services $ns .) }}
-    {{- end }}
   {{- end }}
 {{- end }}
 
-{{- /* Debug print to verify aggregation */ -}}
-{{- range $key, $svc := $services }}
-# Service {{ $svc.name }} in namespace {{ $svc.namespace }} has ports:
-{{- range $svc.ports }}
-  - port: {{ .port }}, targetPort: {{ .targetPort }}
-{{- end }}
-
-{{- end }}
 
 {{- /* Render services */ -}}
 {{- range $key, $svc := $services }}
