@@ -24,6 +24,9 @@ spec:
       {{- range .services }}
         - name: {{ .name }}
           port: {{ .port }}
+          {{- if .passHostHeader }}
+          passHostHeader: true
+          {{- end }}
           {{- if .insecureSkipVerify }}
           serversTransport: {{ printf "%s-transport" .name }}
           {{- end }}
