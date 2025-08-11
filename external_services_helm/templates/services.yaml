@@ -16,8 +16,8 @@ per unique (name, externalName) pair. Avoid duplicate ports.
           {{- if not (hasKey $svcMap $key) }}
             {{- $_ := set $svcMap $key (dict "name" .name "externalName" .externalName "ports" (list)) }}
           {{- end }}
-          {{- $existing := index $svcMap $key }}
-          {{- $ports := get $existing "ports" }}
+          {{- $svc := index $svcMap $key }}
+          {{- $ports := get $svc "ports" }}
           {{- $isDup := false }}
           {{- range $p := $ports }}
             {{- if and (eq (int $p.port) (int .port)) (eq (int $p.targetPort) (int .targetPort)) }}
@@ -26,13 +26,15 @@ per unique (name, externalName) pair. Avoid duplicate ports.
           {{- end }}
           {{- if not $isDup }}
             {{- $ports = append $ports (dict "port" .port "targetPort" .targetPort) }}
-            {{- $_ := set $existing "ports" $ports }}
+            {{- $_ := set $svc "ports" $ports }}
+            {{- $_ := set $svcMap $key $svc }}
           {{- end }}
         {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
+
 
 {{/* Collect from ingressRoutes */}}
 {{- include "collectExternalNameServices" (list $services .Values.ingressRoutes) }}
