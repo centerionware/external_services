@@ -32,7 +32,6 @@ spec:
       {{- range .middlewares }}
         - name: {{ . }}
       {{- end }}
-      {{- end }}
   {{- end }}
   {{- if .tlsSecret }}
   tls:
