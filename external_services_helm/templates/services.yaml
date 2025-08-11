@@ -1,11 +1,11 @@
 {{- $services := dict -}}
 
-{{- /* Helper to add service port with ingressName */ -}}
+{{- /* Helper to add service port with serviceName as port name */ -}}
 {{- define "addPort" -}}
   {{- $svcMap := index . 0 -}}
   {{- $ns := index . 1 -}}
-  {{- $svc := index . 2 -}}        {{/* service dict from values */}}
-  {{- $ingressName := index . 3 -}} {{/* ingress or ingressRoute name */}}
+  {{- $svc := index . 2 -}}          {{/* service dict from values */}}
+  {{- $portName := $svc.name }}       {{/* use service name for port name */}}
   {{- $key := printf "%s/%s" $ns $svc.name }}
 
   {{- if not (hasKey $svcMap $key) }}
@@ -17,13 +17,13 @@
 
   {{- $exists := false }}
   {{- range $p := $ports }}
-    {{- if and (eq $p.port $svc.port) (eq $p.targetPort $svc.targetPort) (eq $p.name $ingressName) }}
+    {{- if and (eq $p.port $svc.port) (eq $p.targetPort $svc.targetPort) (eq $p.name $portName) }}
       {{- $exists = true }}
     {{- end }}
   {{- end }}
 
   {{- if not $exists }}
-    {{- $ports = append $ports (dict "port" $svc.port "targetPort" $svc.targetPort "name" $ingressName) }}
+    {{- $ports = append $ports (dict "port" $svc.port "targetPort" $svc.targetPort "name" $portName) }}
     {{- $_ := set $existingSvc "ports" $ports }}
     {{- $_ := set $svcMap $key $existingSvc }}
   {{- end }}
@@ -32,10 +32,9 @@
 {{- /* Collect from ingressRoutes */ -}}
 {{- range .Values.ingressRoutes }}
   {{- $ns := default $.Release.Namespace .namespace }}
-  {{- $ingressName := .name }}
   {{- range .routes }}
     {{- range .services }}
-        {{- include "addPort" (list $services $ns . $ingressName) }}
+        {{- include "addPort" (list $services $ns .) }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -43,9 +42,8 @@
 {{- /* Collect from classicIngresses */ -}}
 {{- range .Values.classicIngresses }}
   {{- $ns := default $.Release.Namespace .namespace }}
-  {{- $ingressName := .name }}
   {{- range .services }}
-      {{- include "addPort" (list $services $ns . $ingressName) }}
+      {{- include "addPort" (list $services $ns .) }}
   {{- end }}
 {{- end }}
 
@@ -62,7 +60,7 @@ spec:
   externalName: {{ $svc.externalName }}
   ports:
     {{- range $svc.ports }}
-    - name: {{ .name | trimSuffix "-" | lower }}  # Kubernetes port names max 15 chars, no trailing dash
+    - name: {{ .name | trimSuffix "-" | lower }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
     {{- end }}
