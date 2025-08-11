@@ -15,7 +15,6 @@ spec:
   {{- range .entrypoints }}
     - {{ . }}
   {{- end }}
-  {{- end }}
   routes:
   {{- range .routes }}
     - kind: Rule
