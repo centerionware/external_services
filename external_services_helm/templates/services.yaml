@@ -1,60 +1,41 @@
-{{- /*
-Aggregate ExternalName services from ingressRoutes and classicIngresses into a single Service
-per unique (name, externalName) pair. Avoid duplicate ports.
-*/ -}}
-
 {{- $services := dict -}}
 
-{{- define "collectExternalNameServices" -}}
-  {{- $svcMap := index . 0 -}}
-  {{- $routeList := index . 1 -}}
-  {{- range $routeList }}
-    {{- range .routes }}
-      {{- range .services }}
-        {{- if eq .type "ExternalName" }}
-          {{- $key := printf "%s|%s" .name .externalName }}
-          {{- if not (hasKey $svcMap $key) }}
-            {{- $_ := set $svcMap $key (dict "name" .name "externalName" .externalName "ports" (list)) }}
-          {{- end }}
-          {{- $svc := index $svcMap $key }}
-          {{- $ports := get $svc "ports" }}
-          {{- $isDup := false }}
-          {{- range $p := $ports }}
-            {{- if and (eq (int $p.port) (int .port)) (eq (int $p.targetPort) (int .targetPort)) }}
-              {{- $isDup = true }}
-            {{- end }}
-          {{- end }}
-          {{- if not $isDup }}
-            {{- $ports = append $ports (dict "port" .port "targetPort" .targetPort) }}
-            {{- $_ := set $svc "ports" $ports }}
-            {{- $_ := set $svcMap $key $svc }}
-          {{- end }}
-        {{- end }}
+{{- /* Collect services from ingressRoutes */ -}}
+{{- range .Values.ingressRoutes }}
+  {{- $ns := default $.Release.Namespace .namespace }}
+  {{- range .routes }}
+    {{- range .services }}
+      {{- $key := printf "%s/%s" $ns .name }}
+      {{- if not (hasKey $services $key) }}
+        {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "port" .port) }}
       {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
 
-{{/* Collect from ingressRoutes */}}
-{{- include "collectExternalNameServices" (list $services .Values.ingressRoutes) }}
+{{- /* Collect services from classicIngresses */ -}}
+{{- range .Values.classicIngresses }}
+  {{- $ns := default $.Release.Namespace .namespace }}
+  {{- range .services }}
+    {{- $key := printf "%s/%s" $ns .name }}
+    {{- if not (hasKey $services $key) }}
+      {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "port" .port) }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 
-{{/* Collect from classicIngresses */}}
-{{- include "collectExternalNameServices" (list $services .Values.classicIngresses) }}
-
-{{/* Render final Service manifests */}}
+{{- /* Output all unique Services */ -}}
 {{- range $key, $svc := $services }}
----
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $svc.name }}
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ $svc.namespace }}
 spec:
   type: ExternalName
   externalName: {{ $svc.externalName }}
   ports:
-    {{- range $svc.ports }}
-    - port: {{ .port }}
-      targetPort: {{ .targetPort }}
-    {{- end }}
+    - port: {{ $svc.port }}
+      targetPort: {{ $svc.port }}
+---
 {{- end }}
