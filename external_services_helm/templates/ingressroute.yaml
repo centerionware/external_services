@@ -15,6 +15,7 @@ spec:
   {{- range .entrypoints }}
     - {{ . }}
   {{- end }}
+  {{- end }}
   routes:
   {{- range .routes }}
     - kind: Rule
@@ -37,5 +38,4 @@ spec:
   tls:
     secretName: {{ .tlsSecret }}
   {{- end }}
----
 {{- end }}
