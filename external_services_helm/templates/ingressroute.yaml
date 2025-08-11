@@ -34,8 +34,13 @@ spec:
       {{- end }}
       middlewares:
       {{- range .middlewares }}
+        {{- if kindIs "map" . }}
+        - name: {{ .name }}
+          namespace: {{ default $.Release.Namespace .namespace }}
+        {{- else }}
         - name: {{ . }}
-        - namespace: {{ default $.Release.Namespace .namespace }}
+          namespace: {{ $.Release.Namespace }}
+        {{- end }}
       {{- end }}
   {{- end }}
   {{- if .tls }}
