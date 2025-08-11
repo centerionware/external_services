@@ -1,11 +1,14 @@
 {{- $defaultEntryPoints := .Values.global.default_entrypoints }}
 
 {{- range .Values.ingressRoutes }}
+{{- $ns := default $.Release.Namespace .namespace }}
+{{- $secretName := .secretName }}
+{{- $cert := first (where $.Values.certificates "secretName" $secretName) }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: {{ .name }}
-  namespace: {{ default $.Release.Namespace .namespace }}
+  namespace: {{ $ns }}
 spec:
   entryPoints:
   {{- range $defaultEntryPoints }}
@@ -28,7 +31,7 @@ spec:
           passHostHeader: true
           {{- end }}
           {{- if .insecureSkipVerify }}
-          serversTransport: {{ printf "%s-insecureskipverify" (default $.Release.Namespace .namespace) }}
+          serversTransport: {{ printf "%s-insecureskipverify" $ns }}
           {{- end }}
           scheme: {{ default "http" .scheme }}
       {{- end }}
@@ -36,28 +39,24 @@ spec:
       {{- range .middlewares }}
         {{- if kindIs "map" . }}
         - name: {{ .name }}
-          namespace: {{ default $.Release.Namespace .namespace }}
+          namespace: {{ $ns }}
         {{- else }}
         - name: {{ . }}
           namespace: {{ $.Release.Namespace }}
         {{- end }}
       {{- end }}
   {{- end }}
-  {{- if .tls }}
+  {{- if $cert }}
   tls:
-    secretName: {{ .tls.secretName }}
-    {{- if .tls.domains }}
+    secretName: {{ $cert.secretName }}
     domains:
-      {{- range .tls.domains }}
-      - main: {{ .main | quote }}
-        {{- if .sans }}
+      - main: {{ $cert.commonName | quote }}
+        {{- if $cert.dnsNames }}
         sans:
-          {{- range .sans }}
+          {{- range $cert.dnsNames }}
           - {{ . | quote }}
           {{- end }}
         {{- end }}
-      {{- end }}
-    {{- end }}
   {{- end }}
----  
+---
 {{- end }}
