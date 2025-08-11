@@ -13,8 +13,11 @@ per unique (name, externalName) pair. Avoid duplicate ports.
       {{- range .services }}
         {{- if eq .type "ExternalName" }}
           {{- $key := printf "%s|%s" .name .externalName }}
-          {{- $existing := index $svcMap $key | default (dict "name" .name "externalName" .externalName "ports" (list)) }}
-          {{- $ports := $existing.ports }}
+          {{- if not (hasKey $svcMap $key) }}
+            {{- $_ := set $svcMap $key (dict "name" .name "externalName" .externalName "ports" (list)) }}
+          {{- end }}
+          {{- $existing := index $svcMap $key }}
+          {{- $ports := get $existing "ports" }}
           {{- $isDup := false }}
           {{- range $p := $ports }}
             {{- if and (eq (int $p.port) (int .port)) (eq (int $p.targetPort) (int .targetPort)) }}
@@ -23,9 +26,8 @@ per unique (name, externalName) pair. Avoid duplicate ports.
           {{- end }}
           {{- if not $isDup }}
             {{- $ports = append $ports (dict "port" .port "targetPort" .targetPort) }}
+            {{- $_ := set $existing "ports" $ports }}
           {{- end }}
-          {{- $_ := set $existing "ports" $ports }}
-          {{- $_ := set $svcMap $key $existing }}
         {{- end }}
       {{- end }}
     {{- end }}
