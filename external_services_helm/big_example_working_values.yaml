@@ -106,13 +106,7 @@ certificates:
 
 ingressRoutes:
   - name: ai-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: >-
@@ -135,13 +129,7 @@ ingressRoutes:
             port: 9000
             targetPort: 9000
   - name: ceph-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: >-
@@ -164,14 +152,7 @@ ingressRoutes:
             port: 9000
             targetPort: 9000
   - name: centerionware-ingress
-    tls:
-      secretName: centerionware-pages-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
-            - "*.pages.centerionware.com"
+    secretName: centerionware-pages-default
     routes:
       - kind: Rule
         match: >-
@@ -228,13 +209,7 @@ ingressRoutes:
             scheme: http
             passHostHeader: true
   - name: dns-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: >-
@@ -257,13 +232,7 @@ ingressRoutes:
             port: 9000
             targetPort: 9000
   - name: gitlab-mattermost-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`gitlab.centerionware.com`) && PathPrefix(`/`)
@@ -274,6 +243,8 @@ ingressRoutes:
             port: 443
             targetPort: 443
             scheme: https
+            insecureSkipVerify: true
+            passHostHeader: true
         middlewares: []
       - kind: Rule
         match: Host(`mattermost.centerionware.com`) && PathPrefix(`/`)
@@ -284,15 +255,11 @@ ingressRoutes:
             port: 443
             targetPort: 443
             scheme: https
+            insecureSkipVerify: true
+            passHostHeader: true
         middlewares: []
   - name: registries-gitlab-centerionware-com-ingressroute
-    tls:
-      secretName: registery-centerionware
-      domains:
-        - main: "registry.gitlab.centerionware.com"
-          sans:
-            - "registry.gitlab.centerionware.com"
-            - "*.registry.gitlab.centerionware.com"
+    secretName: registery-centerionware
     routes:
       - kind: Rule
         match: >-
@@ -329,13 +296,7 @@ ingressRoutes:
         middlewares: []
   - name: helpdesk-centerionware-com-ingressroute
     namespace: homelab
-    tls:
-      secretName: helpdesk-centerionware
-      domains:
-        - main: "helpdesk.centerionware.com"
-          sans:
-            - "helpdesk.centerionware.com"
-            - "*.helpdesk.centerionware.com"
+    secretName: helpdesk-centerionware
     routes:
       - kind: Rule
         match: >-
@@ -358,13 +319,7 @@ ingressRoutes:
             targetPort: 8070
             scheme: http
   - name: mail-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`mail.centerionware.com`) && PathPrefix(`/`)
@@ -384,13 +339,7 @@ ingressRoutes:
             port: 443
             scheme: https
   - name: mailcow-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`mailcow.centerionware.com`) && PathPrefix(`/`)
@@ -402,13 +351,7 @@ ingressRoutes:
             scheme: https
         middlewares: []
   - name: n8n-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`n8n.centerionware.com`) && PathPrefix(`/`)
@@ -420,13 +363,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: nextcloud-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`nextcloud.centerionware.com`) && PathPrefix(`/`)
@@ -438,13 +375,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: omni-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`omni.centerionware.com`) && PathPrefix(`/`)
@@ -456,13 +387,7 @@ ingressRoutes:
             scheme: https
         middlewares: []
   - name: openwrt-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: >-
@@ -486,13 +411,7 @@ ingressRoutes:
             port: 9000
             targetPort: 9000
   - name: proxmox-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domproxmoxns:
-        - mproxmoxn: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: >-
@@ -516,13 +435,7 @@ ingressRoutes:
             port: 9000
             targetPort: 9000
   - name: plex-centerionware-com-ingressroute
-    tls:
-      secretName: plex-centerionware
-      domains:
-        - main: "plex.centerionware.com"
-          sans:
-            - "plex.centerionware.com"
-            - "*.plex.centerionware.com"
+    secretName: plex-centerionware
     routes:
       - kind: Rule
         match: Host(`plex.centerionware.com`) && PathPrefix(`/`)
@@ -535,12 +448,7 @@ ingressRoutes:
             insecureSkipVerify: true
         middlewares: []
   - name: register-jarvis-centerionware-com-ingressroute
-    tls:
-      secretName: register-jarvis-centerionware
-      domains:
-        - main: "register.jarvis.ai.centerionware.com"
-          sans: 
-            - "register.jarvis.ai.centerionware.com"
+    secretName: register-jarvis-centerionware
     routes:
       - kind: Rule
         match: Host(`register.jarvis.centerionware.com`) && PathPrefix(`/`)
@@ -552,13 +460,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: shinobi-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`shinobi.centerionware.com`) && PathPrefix(`/`)
@@ -570,13 +472,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: social-centerionware-com-ingressroute
-    tls:
-      secretName: social-centerionware
-      domains:
-        - main: "social.centerionware.com"
-          sans:
-            - "social.centerionware.com"
-            - "*.social.centerionware.com"
+    secretName: social-centerionware
     routes:
       - kind: Rule
         match: Host(`moodle.social.centerionware.com`) && PathPrefix(`/`)
@@ -606,13 +502,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: vaultwarden-centerionware-com-ingressroute
-    tls:
-      secretName: vault-centerionware
-      domains:
-        - main: "vault.centerionware.com"
-          sans:
-            - "vault.centerionware.com"
-            - "vaultwarden.vault.centerionware.com"
+    secretName: vault-centerionware
     routes:
       - kind: Rule
         match: Host(`vaultwarden.vault.centerionware.com`) && PathPrefix(`/`)
@@ -624,13 +514,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: vpn-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`vpn.centerionware.com`) && PathPrefix(`/`)
@@ -642,13 +526,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: wazuh-centerionware-com-ingressroute
-    tls:
-      secretName: wazuh-centerionware-default
-      domains:
-        - main: "wazuh.centerionware.com"
-          sans:
-            - "wazuh.centerionware.com"
-            - "*.wazuh.centerionware.com"
+    secretName: wazuh-centerionware-default
     routes:
       - kind: Rule
         match: Host(`wazuh.centerionware.com`) && PathPrefix(`/`)
@@ -679,13 +557,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: theforeman-test-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: Host(`theforeman-test.centerionware.com`) && PathPrefix(`/`)
@@ -698,13 +570,7 @@ ingressRoutes:
             insecureSkipVerify: true
         middlewares: []
   - name: dashboard-vm-centerionware-com-ingressroute
-    tls:
-      secretName: dashboard-vm-centerionware-default
-      domains:
-        - main: "dashboard-vm.centerionware.com"
-          sans:
-            - "dashboard-vm.centerionware.com"
-            - "*.dashboard-vm.centerionware.com"
+    secretName: dashboard-vm-centerionware-default
     routes:
       - kind: Rule
         match: Host(`dashboard.dashboard-vm.centerionware.com`) && PathPrefix(`/`)
@@ -726,13 +592,7 @@ ingressRoutes:
             scheme: http
         middlewares: []
   - name: invoice-ninja-middletest-centerionware-com-ingressroute
-    tls:
-      secretName: middletest-centerionware
-      domains:
-        - main: "middletest.centerionware.com"
-          sans:
-            - "middletest.centerionware.com"
-            - "*.middletest.centerionware.com"
+    secretName: middletest-centerionware
     routes:
       - kind: Rule
         match: Host(`invoice-ninja.middletest.centerionware.com`) && PathPrefix(`/`)
@@ -742,6 +602,19 @@ ingressRoutes:
             externalName: middletest.centerionware.lan
             port: 805
             scheme: http
+        middlewares: []
+  - name: argocd-centerionware-com-ingressroute
+    secretName: centerionware-default
+    routes:
+      - kind: Rule
+        match: Host(`argocd.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: argocd-routing-centerionware-com-service
+            externalName: argocd-server.argocd.svc.cluster.local
+            port: 443
+            scheme: https
+            insecureSkipVerify: true
         middlewares: []
 
 

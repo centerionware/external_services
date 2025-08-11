@@ -22,8 +22,27 @@ This reduces the time it takes to create an ingress from 20+ minutes to 3-5 minu
 
 ### So far
 
-So far I'm running 26 IngressRoutes with this chart, including one for ArgoCD because one of the updates broke https backends. The ArgoCD is given the letsencrypt certificate for the domain it's running on, but the actual hostname of the pod is 'argocd' and not the FQDN. So the ingress creates a Internal Server Error when trying to use a regular kubernetes Ingress. I tried to tie the ingress to a ServerTransport CRD via annotations by following the documentation but it didn't work so instead I used this chart with an externalName pointing to argocd.argocd.svc.cluster.local and set insecureSkipVerify: true , and now argocd's ingress is working again.
+From 39 lines of yaml for the simplest kubernetes external service to 10 lines (+9 for the certificate, but the certificates can often be re-used across multiple ingressRoutes)
 
+```
+  - name: n8n-centerionware-com-ingressroute
+    secretName: centerionware-default
+    routes:
+      - kind: Rule
+        match: Host(`n8n.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: n8n-routing-centerionware-com-service
+            externalName: n8n.centerionware.lan
+            port: 80
+            scheme: http
+```
+
+And this generates all the manifests for all the things. 
+
+348 lines was the largest definition I had for a specific set of ingresses, and this replaced it with 56(+9) lines of specification (centerionware-ingress in the examples).
+
+Technically the `type: ExternalName` isn't used either, they're all ExternalName services so that's one more line that can be removed.
 
 ### Roadmap
 

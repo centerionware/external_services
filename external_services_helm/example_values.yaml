@@ -2,6 +2,7 @@ global:
   default_entrypoints:
     - websecure   # define your default entrypoints here
     - web
+
 certificates:
   - name: centerionware-default
     secretName: centerionware-default
@@ -22,15 +23,27 @@ certificates:
       - centerionware.com
       - '*.centerionware.com'
       - "*.pages.centerionware.com"
+
+
+
+
+
+
+
 ingressRoutes:
+  - name: n8n-centerionware-com-ingressroute
+    secretName: centerionware-default
+    routes:
+      - kind: Rule
+        match: Host(`n8n.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: n8n-routing-centerionware-com-service
+            externalName: n8n.centerionware.lan
+            port: 80
+            scheme: http
   - name: ai-centerionware-com-ingressroute
-    tls:
-      secretName: centerionware-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
+    secretName: centerionware-default
     routes:
       - kind: Rule
         match: >-
@@ -52,15 +65,12 @@ ingressRoutes:
             externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
             port: 9000
             targetPort: 9000
+
+
+
+
   - name: centerionware-ingress
-    tls:
-      secretName: centerionware-pages-default
-      domains:
-        - main: "centerionware.com"
-          sans:
-            - "centerionware.com"
-            - "*.centerionware.com"
-            - "*.pages.centerionware.com"
+    secretName: centerionware-pages-default
     routes:
       - kind: Rule
         match: >-
@@ -119,72 +129,66 @@ ingressRoutes:
 
 
 
+
+
+
+
+
 middlewares:
   - name: resume-auth
     spec:
       basicAuth:
         secret: resume-secret
-
   - name: alpine-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://alpine-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/alpine-runner.sh"
-
   - name: build-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://build-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/build-runner.sh"
-
   - name: cloud-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://cloud-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/cloud-runner.sh"
-
   - name: sixcloud-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://sixcloud-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/cloud-runner6.sh"
-
   - name: kiosk-redirectregex
     spec:
       redirectRegex:
         regex: "^https://kiosk.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/kiosk.sh"
-
   - name: notes-redirectregex
     spec:
       redirectRegex:
         regex: "^https://notes.centerionware.com"
         replacement: "https://nextcloud.centerionware.com/index.php/apps/notes"
-
   - name: www-redirectregex
     spec:
       redirectRegex:
         regex: "^https://www.centerionware.com"
         replacement: "https://centerionware.com"
-
   - name: onboarding-redirectregex
     spec:
       redirectRegex:
         regex: "^https://onboarding.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/init.sh"
-
   - name: runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/runner.sh"
-
   - name: sshkey-redirectregex
     spec:
       redirectRegex:
         regex: "^https://sshkey.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/ssh_key"
-
   - name: helpdesk-redirectregex
     spec:
       redirectRegex:
@@ -199,7 +203,6 @@ middlewares:
         browserXssFilter: true
         contentTypeNosniff: true
         referrerPolicy: "no-referrer"
-
   - name: search-xng-search-centerionware-com-searxng-headers
     spec:
       headers:
@@ -209,8 +212,7 @@ middlewares:
             upgrade-insecure-requests; default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self' https://github.com/searxng/searxng/issues/new; font-src 'self'; frame-ancestors 'self'; base-uri 'self'; connect-src 'self' https://overpass-api.de; img-src 'self' data: https://*.tile.openstreetmap.org; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com https://www.deezer.com https://www.mixcloud.com https://w.soundcloud.com https://embed.spotify.com"
           Permissions-Policy: >-
             accelerometer=(),ambient-light-sensor=(),autoplay=(),camera=(),encrypted-media=(),focus-without-user-activation=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),speaker=(),sync-xhr=(),usb=(),vr=()
-
-  - name: authentik
+  - name: authentik  
     spec:
       forwardAuth:
         address: "http://ak-outpost-all-proxy-outpost.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
@@ -228,3 +230,11 @@ middlewares:
           - X-authentik-meta-provider
           - X-authentik-meta-app
           - X-authentik-meta-version
+  - name: dashboard-vm-forwarded-proto
+    spec: 
+      headers:
+        customResponseHeaders:
+          X-Forwarded-Proto: https,wss
+
+
+
