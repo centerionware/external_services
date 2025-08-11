@@ -1,69 +1,51 @@
+{{- /*
+Aggregate ExternalName services from ingressRoutes and classicIngresses into a single Service
+per unique (name, externalName) pair. Avoid duplicate ports.
+*/ -}}
+
 {{- $services := dict -}}
 
-{{- /* Collect services and aggregate ports */ -}}
-{{- range .Values.ingressRoutes }}
-  {{- $ns := default $.Release.Namespace .namespace }}
-  {{- range .routes }}
-    {{- range .services }}
-      {{- $key := printf "%s/%s" $ns .name }}
-
-      {{- if not (hasKey $services $key) }}
-        {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "ports" (list (dict "port" .port "targetPort" (default .port .targetPort))) ) }}
-      {{- else }}
-        {{- $svc := index $services $key }}
-
-        {{- /* Check if this port already exists */ -}}
-        {{- $existingPorts := $svc.ports }}
-        {{- $portExists := false }}
-        {{- range $existingPorts }}
-          {{- if eq .port $.port }}
-            {{- $portExists = true }}
+{{- define "collectExternalNameServices" -}}
+  {{- $svcMap := index . 0 -}}
+  {{- $routeList := index . 1 -}}
+  {{- range $routeList }}
+    {{- range .routes }}
+      {{- range .services }}
+        {{- if eq .type "ExternalName" }}
+          {{- $key := printf "%s|%s" .name .externalName }}
+          {{- $existing := index $svcMap $key | default (dict "name" .name "externalName" .externalName "ports" (list)) }}
+          {{- $ports := $existing.ports }}
+          {{- $isDup := false }}
+          {{- range $p := $ports }}
+            {{- if and (eq (int $p.port) (int .port)) (eq (int $p.targetPort) (int .targetPort)) }}
+              {{- $isDup = true }}
+            {{- end }}
           {{- end }}
-        {{- end }}
-
-        {{- if not $portExists }}
-          {{- $_ := set $svc "ports" (append $svc.ports (dict "port" .port "targetPort" (default .port .targetPort))) }}
-          {{- $_ := set $services $key $svc }}
+          {{- if not $isDup }}
+            {{- $ports = append $ports (dict "port" .port "targetPort" .targetPort) }}
+          {{- end }}
+          {{- $_ := set $existing "ports" $ports }}
+          {{- $_ := set $svcMap $key $existing }}
         {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
 
-{{- /* Repeat same for classicIngresses */ -}}
-{{- range .Values.classicIngresses }}
-  {{- $ns := default $.Release.Namespace .namespace }}
-  {{- range .services }}
-    {{- $key := printf "%s/%s" $ns .name }}
+{{/* Collect from ingressRoutes */}}
+{{- include "collectExternalNameServices" (list $services .Values.ingressRoutes) }}
 
-    {{- if not (hasKey $services $key) }}
-      {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "ports" (list (dict "port" .port "targetPort" (default .port .targetPort)))) }}
-    {{- else }}
-      {{- $svc := index $services $key }}
+{{/* Collect from classicIngresses */}}
+{{- include "collectExternalNameServices" (list $services .Values.classicIngresses) }}
 
-      {{- $existingPorts := $svc.ports }}
-      {{- $portExists := false }}
-      {{- range $existingPorts }}
-        {{- if eq .port $.port }}
-          {{- $portExists = true }}
-        {{- end }}
-      {{- end }}
-
-      {{- if not $portExists }}
-        {{- $_ := set $svc "ports" (append $svc.ports (dict "port" .port "targetPort" (default .port .targetPort))) }}
-        {{- $_ := set $services $key $svc }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-
-{{- /* Output all unique Services with all ports aggregated */ -}}
-{{- range $key, $svc := $services }}
+{{/* Render final Service manifests */}}
+{{- range $svc := $services }}
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $svc.name }}
-  namespace: {{ $svc.namespace }}
+  namespace: {{ $.Release.Namespace }}
 spec:
   type: ExternalName
   externalName: {{ $svc.externalName }}
@@ -72,5 +54,4 @@ spec:
     - port: {{ .port }}
       targetPort: {{ .targetPort }}
     {{- end }}
----
 {{- end }}
