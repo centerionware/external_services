@@ -6,9 +6,11 @@
   {{- $ns := index . 1 -}}
   {{- $svc := index . 2 -}}          {{/* service dict from values */}}
 
+  {{- /* default targetPort to port if missing */ -}}
+  {{- $targetPort := default $svc.port $svc.targetPort }}
+
   {{- /* Build port name as: serviceName-port-targetPort, e.g. mysvc-6000-6000 */ -}}
-  {{- $portNameRaw := printf "%s-%s-%s" $svc.name (toString $svc.port) (toString $svc.targetPort) }}
-  {{- /* Kubernetes port names must be <=15 chars, lowercase, no trailing dash */ -}}
+  {{- $portNameRaw := printf "%s-%s-%s" $svc.name (toString $svc.port) (toString $targetPort) }}
   {{- $portName := $portNameRaw | lower | trimSuffix "-" }}
 
   {{- $key := printf "%s/%s" $ns $svc.name }}
@@ -22,13 +24,13 @@
 
   {{- $exists := false }}
   {{- range $p := $ports }}
-    {{- if and (eq $p.port $svc.port) (eq $p.targetPort $svc.targetPort) (eq $p.name $portName) }}
+    {{- if and (eq $p.port $svc.port) (eq $p.targetPort $targetPort) (eq $p.name $portName) }}
       {{- $exists = true }}
     {{- end }}
   {{- end }}
 
   {{- if not $exists }}
-    {{- $ports = append $ports (dict "port" $svc.port "targetPort" $svc.targetPort "name" $portName) }}
+    {{- $ports = append $ports (dict "port" $svc.port "targetPort" $targetPort "name" $portName) }}
     {{- $_ := set $existingSvc "ports" $ports }}
     {{- $_ := set $svcMap $key $existingSvc }}
   {{- end }}
