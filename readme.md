@@ -12,7 +12,8 @@ It generates ExternalName services, middlewares, servertransports, certificates,
 
 Two working examples are provided to show intended usage.
 
-A compose for your Traefik Ingress.
+## What is it?
+A compose for your kubernetes Traefik Ingress.
 
 ### Why? 
 
