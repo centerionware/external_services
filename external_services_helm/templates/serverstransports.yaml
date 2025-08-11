@@ -1,0 +1,29 @@
+{{- $transports := dict -}}
+
+{{- range .Values.ingressRoutes }}
+  {{- $ns := default $.Release.Namespace .namespace }}
+  {{- range .routes }}
+    {{- range .services }}
+      {{- if .insecureSkipVerify }}
+        {{- $tname := printf "%s-transport" .name }}
+        {{- if not (hasKey $transports $tname) }}
+          {{- $_ := set $transports $tname (dict "name" $tname "namespace" $ns "insecureSkipVerify" true "serverName" (default "" .serverName)) }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- range $tname, $t := $transports }}
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: {{ $t.name }}
+  namespace: {{ $t.namespace }}
+spec:
+{{- if $t.serverName }}
+  serverName: {{ $t.serverName }}
+{{- end }}
+  insecureSkipVerify: {{ $t.insecureSkipVerify }}
+---
+{{- end }}

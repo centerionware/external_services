@@ -1,0 +1,348 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: centerionware-service
+  namespace: homelab
+spec:
+  type: ExternalName
+  externalName: gitlab.centerionware.lan
+  ports:
+  - name: http
+    port: 801
+    targetPort: 801
+    nodePort: 801
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-alpine-runner-redirectregex@kubernetescrd # Optional
+  name: alpine-runner-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: alpine-runner.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-build-runner-redirectregex@kubernetescrd # Optional
+  name: build-runner-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: build-runner.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-cloud-runner-redirectregex@kubernetescrd # Optional
+  name: cloud-runner-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: cloud-runner.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-sixcloud-runner-redirectregex@kubernetescrd # Optional
+  name: sixcloud-runner-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: sixcloud-runner.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-kiosk-redirectregex@kubernetescrd # Optional
+  name: kiosk-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: kiosk.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-notes-redirectregex@kubernetescrd # Optional
+  name: notes-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: notes.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-onboarding-redirectregex@kubernetescrd # Optional
+  name: onboarding-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: onboarding.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-runner-redirectregex@kubernetescrd # Optional
+  name: runner-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: runner.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-sshkey-redirectregex@kubernetescrd # Optional
+  name: sshkey-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: sshkey.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-www-redirectregex@kubernetescrd # Optional
+  name: www-redirectregex
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: www.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+  name: centerionware-com
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "centerionware.com"
+        - "*.centerionware.com"
+      secretName: centerionware-pages-default
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+  name: pages-centerionware-com
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "*.pages.centerionware.com"
+      http:
+        paths:
+          - backend:
+              service:
+                name: centerionware-service
+                port:
+                  number: 801
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "pages.centerionware.com"
+        - "*.pages.centerionware.com"
+      secretName: centerionware-pages-default

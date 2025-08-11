@@ -1,0 +1,42 @@
+{{- range .Values.ingressRoutes }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .name }}
+  namespace: {{ default $.Release.Namespace .namespace }}
+spec:
+  entryPoints:
+  {{- range default (list "web") .entryPoints }}
+    - {{ . }}
+  {{- end }}
+  routes:
+  {{- range .routes }}
+    - kind: Rule
+      match: {{ .match | quote }}
+      services:
+      {{- range .services }}
+        - name: {{ .name }}
+          port: {{ .port }}
+          {{- if .insecureSkipVerify }}
+          serversTransport: {{ printf "%s-transport" .name }}
+          {{- end }}
+      {{- end }}
+      {{- if .scheme }}
+      scheme: {{ .scheme }}
+      {{- end }}
+      {{- if .path }}
+      path: {{ .path }}
+      {{- end }}
+      {{- if .middlewares }}
+      middlewares:
+      {{- range .middlewares }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+  {{- end }}
+  {{- if .tlsSecret }}
+  tls:
+    secretName: {{ .tlsSecret }}
+  {{- end }}
+---
+{{- end }}

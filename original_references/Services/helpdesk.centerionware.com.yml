@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: helpdesk-service
+  namespace: homelab
+spec:
+  type: ExternalName
+  externalName: helpdesk.centerionware.lan
+  ports:
+  - name: http
+    port: 8081
+    targetPort: 8081
+  - name: isso
+    port: 8070
+    targetPort: 8070
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    # traefik.ingress.kubernetes.io/router.middlewares: homelab-authentik@kubernetescrd # Optional
+  name: helpdesk-ingress
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: helpdesk.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: helpdesk-service
+                port:
+                  number: 8081
+            path: / #Example.
+            pathType: Prefix
+    - host: isso.helpdesk.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: helpdesk-service
+                port:
+                  number: 8070
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - helpdesk.centerionware.com
+        - '*.helpdesk.centerionware.com'
+      secretName: helpdesk-centerionware

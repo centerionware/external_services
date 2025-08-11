@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-service
+  namespace: homelab
+spec:
+  type: ExternalName
+  externalName: social.centerionware.lan
+  ports:
+  - name: moodle
+    port: 8111
+    targetPort: 8111
+  - name: pixelfed
+    port: 8093
+    targetPort: 8093
+  - name: postiz
+    port: 5000
+    targetPort: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-authentik@kubernetescrd # Optional
+  name: social-ingress
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: moodle.social.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: social-service
+                port:
+                  number: 8111
+            path: /
+            pathType: Prefix
+    - host: pixelfed.social.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: social-service
+                port:
+                  number: 8093
+            path: /
+            pathType: Prefix
+    - host: postiz.social.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: social-service
+                port:
+                  number: 5000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "social.centerionware.com"
+        - "*.social.centerionware.com"
+      secretName: social-centerionware

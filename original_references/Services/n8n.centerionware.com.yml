@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-service
+  namespace: homelab
+spec:
+  type: ExternalName
+  externalName: n8n.centerionware.lan
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+  name: n8n-ingress
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: n8n.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: n8n-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: express.n8n.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: n8n-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "n8n.centerionware.com"
+        - "*.n8n.centerionware.com"
+      secretName: n8n-centerionware

@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxmox-service
+  namespace: homelab
+spec:
+  type: ExternalName
+  externalName: pve.centerionware.lan
+  ports:
+  - name: https
+    port: 8006
+    targetPort: 8006
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: homelab-authentik@kubernetescrd # Optional
+  name: proxmox-ingress
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: proxmox.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: proxmox-service
+                port:
+                  number: 8006
+            path: /
+            pathType: Prefix
+          - backend:
+              service:
+                name: auth-forward
+                port:
+                  number: 9000
+            path: /outpost.goauthentik.io/
+            pathType: Prefix
+  tls:
+    - hosts:
+        - centerionware.com
+        - '*.centerionware.com'
+      secretName: centerionware-default

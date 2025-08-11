@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-service
+  namespace: homelab
+spec:
+  type: ExternalName
+  externalName: search.centerionware.lan
+  ports:
+  - name: http
+    port: 8092
+    targetPort: 8092
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
+    #traefik.ingress.kubernetes.io/router.middlewares: homelab-search-xng-search-centerionware-com-general-security@kubernetescrd,homelab-search-xng-search-centerionware-com-searxng-headers@kubernetescrd # Optional
+  name: search-ingress
+  namespace: homelab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: search-xng.search.centerionware.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: search-service
+                port:
+                  number: 8092
+            path: / #Example.
+            pathType: Prefix
+  tls:
+    - hosts:
+        - "search.centerionware.com"
+        - "*.search.centerionware.com"
+      secretName: search-centerionware

@@ -1,0 +1,28 @@
+apiVersion: v2
+name: traefik-ingress-bundle
+description: >
+  A Helm chart to manage Traefik IngressRoutes, classic Ingresses, Services,
+  Certificates, and optional ServersTransports with reusable middleware references.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - traefik
+  - ingress
+  - ingressroute
+  - certificate
+  - serverstransport
+  - middleware
+
+home: https://traefik.io/
+sources:
+  - https://doc.traefik.io/traefik/
+  - https://cert-manager.io/docs/
+  - https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+maintainers:
+  - name: Your Name
+    email: you@example.com
+
+dependencies: []
