@@ -1,10 +1,11 @@
 {{- $services := dict -}}
 
-{{- /* Helper to add service port */ -}}
+{{- /* Helper to add service port with ingressName */ -}}
 {{- define "addPort" -}}
   {{- $svcMap := index . 0 -}}
   {{- $ns := index . 1 -}}
-  {{- $svc := index . 2 -}}    {{/* service dict from values */}}
+  {{- $svc := index . 2 -}}        {{/* service dict from values */}}
+  {{- $ingressName := index . 3 -}} {{/* ingress or ingressRoute name */}}
   {{- $key := printf "%s/%s" $ns $svc.name }}
 
   {{- if not (hasKey $svcMap $key) }}
@@ -16,13 +17,13 @@
 
   {{- $exists := false }}
   {{- range $p := $ports }}
-    {{- if and (eq $p.port $svc.port) (eq $p.targetPort $svc.targetPort) }}
+    {{- if and (eq $p.port $svc.port) (eq $p.targetPort $svc.targetPort) (eq $p.name $ingressName) }}
       {{- $exists = true }}
     {{- end }}
   {{- end }}
 
   {{- if not $exists }}
-    {{- $ports = append $ports (dict "port" $svc.port "targetPort" $svc.targetPort) }}
+    {{- $ports = append $ports (dict "port" $svc.port "targetPort" $svc.targetPort "name" $ingressName) }}
     {{- $_ := set $existingSvc "ports" $ports }}
     {{- $_ := set $svcMap $key $existingSvc }}
   {{- end }}
@@ -31,9 +32,10 @@
 {{- /* Collect from ingressRoutes */ -}}
 {{- range .Values.ingressRoutes }}
   {{- $ns := default $.Release.Namespace .namespace }}
+  {{- $ingressName := .name }}
   {{- range .routes }}
     {{- range .services }}
-        {{- include "addPort" (list $services $ns .) }}
+        {{- include "addPort" (list $services $ns . $ingressName) }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -41,11 +43,11 @@
 {{- /* Collect from classicIngresses */ -}}
 {{- range .Values.classicIngresses }}
   {{- $ns := default $.Release.Namespace .namespace }}
+  {{- $ingressName := .name }}
   {{- range .services }}
-      {{- include "addPort" (list $services $ns .) }}
+      {{- include "addPort" (list $services $ns . $ingressName) }}
   {{- end }}
 {{- end }}
-
 
 {{- /* Render services */ -}}
 {{- range $key, $svc := $services }}
@@ -60,7 +62,8 @@ spec:
   externalName: {{ $svc.externalName }}
   ports:
     {{- range $svc.ports }}
-    - port: {{ .port }}
+    - name: {{ .name | trunc 15 | trimSuffix "-" | lower }}  # Kubernetes port names max 15 chars, no trailing dash
+      port: {{ .port }}
       targetPort: {{ .targetPort }}
     {{- end }}
 
