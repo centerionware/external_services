@@ -27,6 +27,7 @@ spec:
           {{- if .insecureSkipVerify }}
           serversTransport: {{ printf "%s-transport" .name }}
           {{- end }}
+          scheme: {{ default "http" .scheme }}
       {{- end }}
       middlewares:
       {{- range .middlewares }}
