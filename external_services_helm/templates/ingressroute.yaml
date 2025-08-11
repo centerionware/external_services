@@ -28,13 +28,6 @@ spec:
           serversTransport: {{ printf "%s-transport" .name }}
           {{- end }}
       {{- end }}
-      {{- if .scheme }}
-      scheme: {{ .scheme }}
-      {{- end }}
-      {{- if .path }}
-      path: {{ .path }}
-      {{- end }}
-      {{- if .middlewares }}
       middlewares:
       {{- range .middlewares }}
         - name: {{ . }}
