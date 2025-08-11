@@ -1,11 +1,16 @@
 {{- $services := dict -}}
 
-{{- /* Helper to add service port with serviceName as port name */ -}}
+{{- /* Helper to add service port with serviceName + ports as port name */ -}}
 {{- define "addPort" -}}
   {{- $svcMap := index . 0 -}}
   {{- $ns := index . 1 -}}
   {{- $svc := index . 2 -}}          {{/* service dict from values */}}
-  {{- $portName := $svc.name }}       {{/* use service name for port name */}}
+
+  {{- /* Build port name as: serviceName-port-targetPort, e.g. mysvc-6000-6000 */ -}}
+  {{- $portNameRaw := printf "%s-%d-%d" $svc.name $svc.port $svc.targetPort }}
+  {{- /* Kubernetes port names must be <=15 chars, lowercase, no trailing dash */ -}}
+  {{- $portName := $portNameRaw | trunc 15 | lower | trimSuffix "-" }}
+
   {{- $key := printf "%s/%s" $ns $svc.name }}
 
   {{- if not (hasKey $svcMap $key) }}
@@ -60,7 +65,7 @@ spec:
   externalName: {{ $svc.externalName }}
   ports:
     {{- range $svc.ports }}
-    - name: {{ .name | trimSuffix "-" | lower }}
+    - name: {{ .name }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
     {{- end }}
