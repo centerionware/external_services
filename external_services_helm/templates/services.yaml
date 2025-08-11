@@ -35,7 +35,6 @@ per unique (name, externalName) pair. Avoid duplicate ports.
   {{- end }}
 {{- end }}
 
-
 {{/* Collect from ingressRoutes */}}
 {{- include "collectExternalNameServices" (list $services .Values.ingressRoutes) }}
 
@@ -43,7 +42,7 @@ per unique (name, externalName) pair. Avoid duplicate ports.
 {{- include "collectExternalNameServices" (list $services .Values.classicIngresses) }}
 
 {{/* Render final Service manifests */}}
-{{- range $svc := $services }}
+{{- range $key, $svc := $services }}
 ---
 apiVersion: v1
 kind: Service
