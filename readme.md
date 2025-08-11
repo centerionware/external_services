@@ -40,7 +40,7 @@ From 39 lines of yaml for the simplest kubernetes external service to 10 lines (
 
 And this generates all the manifests for all the things. 
 
-348 lines was the largest definition I had for a specific set of ingresses, and this replaced it with 56(+9) lines of specification (centerionware-ingress in the examples).
+348 lines was the largest definition I had for a specific set of ingresses, and this replaced it with 56(+9) lines of specification (centerionware-ingress in the examples). This doesn't include the middlewares required for this part for either side. Middlewares definitions with this are also made smaller but by a fixed amount.
 
 Technically the `type: ExternalName` isn't used either, they're all ExternalName services so that's one more line that can be removed.
 
