@@ -1,7 +1,7 @@
 global:
   default_entrypoints:
     - websecure   # define your default entrypoints here
-
+    - web
 certificates:
   - name: centerionware-default
     secretName: centerionware-default
@@ -12,7 +12,16 @@ certificates:
     dnsNames:
       - centerionware.com
       - '*.centerionware.com'
-
+  - name: centerionware-pages-default
+    secretName: centerionware-pages-default
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: centerionware.com
+    dnsNames:
+      - centerionware.com
+      - '*.centerionware.com'
+      - "*.pages.centerionware.com"
 ingressRoutes:
   - name: ai-centerionware-com-ingressroute
     tls:
@@ -32,6 +41,7 @@ ingressRoutes:
             externalName: ai-agent-text.centerionware.lan
             port: 3000
             targetPort: 3000
+            scheme: http
         middlewares:
           - authentik
       - kind: Rule
@@ -42,6 +52,72 @@ ingressRoutes:
             externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
             port: 9000
             targetPort: 9000
+  - name: centerionware-ingress
+    tls:
+      secretName: centerionware-pages-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+            - "*.pages.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+           Host(`centerionware.com`)
+        services:
+          - kind: Service
+            name: centerionware-service
+            externalName: gitlab.centerionware.lan
+            port: 801
+            scheme: http
+            passHostHeader: true
+        middlewares:
+          - alpine-runner-redirectregex
+          - build-runner-redirectregex
+          - cloud-runner-redirectregex
+          - sixcloud-runner-redirectregex
+          - kiosk-redirectregex
+          - notes-redirectregex
+          - onboarding-redirectregex
+          - runner-redirectregex
+          - sshkey-redirectregex
+          - www-redirectregex
+          - helpdesk-redirectregex
+      - kind: Rule
+        match: >-
+           HostRegexp(`(?i)^(alpine|build|sixcloud|cloud)(-(runner|www|kiosk|notes|onboarding|helpdesk|sshkey))?\.centerionware\.com$`)
+        services:
+          - kind: Service
+            name: centerionware-service
+            externalName: gitlab.centerionware.lan
+            port: 801
+            scheme: http
+            passHostHeader: false
+        middlewares:
+          - alpine-runner-redirectregex
+          - build-runner-redirectregex
+          - cloud-runner-redirectregex
+          - sixcloud-runner-redirectregex
+          - kiosk-redirectregex
+          - notes-redirectregex
+          - onboarding-redirectregex
+          - runner-redirectregex
+          - sshkey-redirectregex
+          - www-redirectregex
+          - helpdesk-redirectregex
+      - kind: Rule
+        match: >-
+          HostRegexp(`(?i)^([^.]+)\.pages\.centerionware\.com$`)
+        services:
+          - kind: Service
+            name: centerionware-service
+            externalName: gitlab.centerionware.lan
+            port: 801
+            scheme: http
+            passHostHeader: true
+
+
 
 middlewares:
   - name: resume-auth
