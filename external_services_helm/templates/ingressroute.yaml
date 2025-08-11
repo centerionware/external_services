@@ -34,9 +34,21 @@ spec:
         - name: {{ . }}
       {{- end }}
   {{- end }}
-  {{- if .tlsSecret }}
+  {{- if .tls }}
   tls:
-    secretName: {{ .tlsSecret }}
+    secretName: {{ .tls.secretName }}
+    {{- if .tls.domains }}
+    domains:
+      {{- range .tls.domains }}
+      - main: {{ .main | quote }}
+        {{- if .sans }}
+        sans:
+          {{- range .sans }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
   {{- end }}
 ---  
 {{- end }}
