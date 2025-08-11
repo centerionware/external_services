@@ -32,6 +32,77 @@ certificates:
     dnsNames:
       - registry.gitlab.centerionware.com
       - '*.registry.gitlab.centerionware.com'
+  - name: helpdesk-centerionware
+    secretName: helpdesk-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: helpdesk.centerionware.com
+    dnsNames:
+      - helpdesk.centerionware.com
+      - '*.helpdesk.centerionware.com'
+  - name: plex-centerionware
+    secretName: plex-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: plex.centerionware.com
+    dnsNames:
+      - plex.centerionware.com
+      - '*.plex.centerionware.com'
+  - name: register-jarvis-centerionware
+    secretName: register-jarvis-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: register.jarvis.ai.centerionware.com
+    dnsNames:
+      - register.jarvis.ai.centerionware.com
+  - name: social-centerionware
+    secretName: social-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: social.centerionware.com
+    dnsNames:
+      - social.centerionware.com
+      - '*.social.centerionware.com'
+  - name: vault-centerionware
+    secretName: vault-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: vault.centerionware.com
+    dnsNames:
+      - vault.centerionware.com
+      - vaultwarden.vault.centerionware.com
+  - name: wazuh-centerionware-default
+    secretName: wazuh-centerionware-default
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: wazuh.centerionware.com
+    dnsNames:
+      - wazuh.centerionware.com
+      - '*.wazuh.centerionware.com'
+  - name: dashboard-vm-centerionware-default
+    secretName: dashboard-vm-centerionware-default
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: dashboard-vm.centerionware.com
+    dnsNames:
+      - dashboard-vm.centerionware.com
+      - '*.dashboard-vm.centerionware.com'
+  - name: middletest-centerionware
+    secretName: middletest-centerionware
+    issuerRef:
+      name: cloudflare-issuer
+      kind: ClusterIssuer
+    commonName: middletest.centerionware.com
+    dnsNames:
+      - middletest.centerionware.com
+      - '*.middletest.centerionware.com'
 
 ingressRoutes:
   - name: ai-centerionware-com-ingressroute
@@ -256,6 +327,422 @@ ingressRoutes:
             targetPort: 5000
             scheme: http
         middlewares: []
+  - name: helpdesk-centerionware-com-ingressroute
+    namespace: homelab
+    tls:
+      secretName: helpdesk-centerionware
+      domains:
+        - main: "helpdesk.centerionware.com"
+          sans:
+            - "helpdesk.centerionware.com"
+            - "*.helpdesk.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`helpdesk.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: helpdesk-service
+            externalName: helpdesk.centerionware.lan
+            port: 8081
+            targetPort: 8081
+            scheme: http
+      - kind: Rule
+        match: >-
+          Host(`isso.helpdesk.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: helpdesk-service
+            externalName: helpdesk.centerionware.lan
+            port: 8070
+            targetPort: 8070
+            scheme: http
+  - name: mail-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`mail.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: mail-routing-centerionware-com-service
+            externalName: iredmail-pro.centerionware.lan
+            port: 443
+            scheme: https
+        middlewares: []
+      - kind: Rule
+        match: Host(`autoconfig.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: mail-routing-centerionware-com-service
+            externalName: iredmail-pro.centerionware.lan
+            port: 443
+            scheme: https
+  - name: mailcow-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`mailcow.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: mailcow-routing-centerionware-com-service
+            externalName: mailcow.centerionware.lan
+            port: 443
+            scheme: https
+        middlewares: []
+  - name: n8n-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`n8n.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: n8n-routing-centerionware-com-service
+            externalName: n8n.centerionware.lan
+            port: 80
+            scheme: http
+        middlewares: []
+  - name: nextcloud-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`nextcloud.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: nextcloud-routing-centerionware-com-service
+            externalName: nextcloud.centerionware.lan
+            port: 11000
+            scheme: http
+        middlewares: []
+  - name: omni-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`omni.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: omni-routing-centerionware-com-service
+            externalName: omni.centerionware.lan
+            port: 443
+            scheme: https
+        middlewares: []
+  - name: openwrt-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`openwrt.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: openwrt-centerionware-com-service
+            externalName: openwrt.centerionware.lan
+            port: 443
+            targetPort: 443
+            scheme: http
+            insecureSkipVerify: true
+        middlewares:
+          - authentik
+      - kind: Rule
+        match: >-
+          Host(`openwrt.centerionware.com`) && PathPrefix(`/outpost.goauthentik.io/`)
+        services:
+          - name: auth-forward
+            externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
+            port: 9000
+            targetPort: 9000
+  - name: proxmox-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domproxmoxns:
+        - mproxmoxn: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: >-
+          Host(`proxmox.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: proxmox-centerionware-com-service
+            externalName: pve.centerionware.lan
+            port: 8006
+            targetPort: 8006
+            scheme: https
+            insecureSkipVerify: true
+        middlewares:
+          - authentik
+      - kind: Rule
+        match: >-
+          Host(`proxmox.centerionware.com`) && PathPrefix(`/outpost.goauthentik.io/`)
+        services:
+          - name: auth-forward
+            externalName: ak-outpost-all-proxy-outpost.authentik.svc.cluster.local
+            port: 9000
+            targetPort: 9000
+  - name: plex-centerionware-com-ingressroute
+    tls:
+      secretName: plex-centerionware
+      domains:
+        - main: "plex.centerionware.com"
+          sans:
+            - "plex.centerionware.com"
+            - "*.plex.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`plex.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: plex-direct-routing-centerionware-com-service
+            externalName: truenas.centerionware.lan
+            port: 32400
+            scheme: https
+            insecureSkipVerify: true
+        middlewares: []
+  - name: register-jarvis-centerionware-com-ingressroute
+    tls:
+      secretName: register-jarvis-centerionware
+      domains:
+        - main: "register.jarvis.ai.centerionware.com"
+          sans: 
+            - "register.jarvis.ai.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`register.jarvis.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: register-jarvis-routing-centerionware-com-service
+            externalName: jarviscontroller.centerionware.lan
+            port: 5000
+            scheme: http
+        middlewares: []
+  - name: shinobi-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`shinobi.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: shinobi-routing-centerionware-com-service
+            externalName: shinobi.centerionware.lan
+            port: 8080
+            scheme: http
+        middlewares: []
+  - name: social-centerionware-com-ingressroute
+    tls:
+      secretName: social-centerionware
+      domains:
+        - main: "social.centerionware.com"
+          sans:
+            - "social.centerionware.com"
+            - "*.social.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`moodle.social.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: social-routing-centerionware-com-service
+            externalName: social.centerionware.lan
+            port: 8111
+            scheme: http
+        middlewares: []
+      - kind: Rule
+        match: Host(`pixelfed.social.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: social-routing-centerionware-com-service
+            externalName: social.centerionware.lan
+            port: 8093
+            scheme: http
+        middlewares: []
+      - kind: Rule
+        match: Host(`postiz.social.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: social-routing-centerionware-com-service
+            externalName: social.centerionware.lan
+            port: 5000
+            scheme: http
+        middlewares: []
+  - name: vaultwarden-centerionware-com-ingressroute
+    tls:
+      secretName: vault-centerionware
+      domains:
+        - main: "vault.centerionware.com"
+          sans:
+            - "vault.centerionware.com"
+            - "vaultwarden.vault.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`vaultwarden.vault.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: vaultwarden-routing-centerionware-com-service
+            externalName: vault.centerionware.lan
+            port: 8115
+            scheme: http
+        middlewares: []
+  - name: vpn-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`vpn.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: vpn-routing-centerionware-com-service
+            externalName: vpn.centerionware.lan
+            port: 51820
+            scheme: http
+        middlewares: []
+  - name: wazuh-centerionware-com-ingressroute
+    tls:
+      secretName: wazuh-centerionware-default
+      domains:
+        - main: "wazuh.centerionware.com"
+          sans:
+            - "wazuh.centerionware.com"
+            - "*.wazuh.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`wazuh.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: wazuh-routing-centerionware-com-service
+            externalName: wazuh.centerionware.lan
+            port: 443
+            scheme: https
+            insecureSkipVerify: true
+        middlewares: []
+      - kind: Rule
+        match: Host(`api.wazuh.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: wazuh-routing-centerionware-com-service
+            externalName: wazuh.centerionware.lan
+            port: 9220
+            scheme: http
+        middlewares: []
+      - kind: Rule
+        match: Host(`grafana.wazuh.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: wazuh-routing-centerionware-com-service
+            externalName: wazuh.centerionware.lan
+            port: 8120
+            scheme: http
+        middlewares: []
+  - name: theforeman-test-centerionware-com-ingressroute
+    tls:
+      secretName: centerionware-default
+      domains:
+        - main: "centerionware.com"
+          sans:
+            - "centerionware.com"
+            - "*.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`theforeman-test.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: theforeman-test-routing-centerionware-com-service
+            externalName: theforeman-test.centerionware.lan
+            port: 443
+            scheme: https
+            insecureSkipVerify: true
+        middlewares: []
+  - name: dashboard-vm-centerionware-com-ingressroute
+    tls:
+      secretName: dashboard-vm-centerionware-default
+      domains:
+        - main: "dashboard-vm.centerionware.com"
+          sans:
+            - "dashboard-vm.centerionware.com"
+            - "*.dashboard-vm.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`dashboard.dashboard-vm.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: dashboard-vm-routing-centerionware-com-service
+            externalName: dashboard-vm.centerionware.lan
+            port: 80
+            scheme: http
+        middlewares:
+          - dashboard-vm-forwarded-proto
+      - kind: Rule
+        match: Host(`dashboard.dashboard-vm.centerionware.com`) && PathPrefix(`/socket.io`)
+        services:
+          - type: ExternalName
+            name: dashboard-vm-routing-centerionware-com-service
+            externalName: dashboard-vm.centerionware.lan
+            port: 5000
+            scheme: http
+        middlewares: []
+  - name: invoice-ninja-middletest-centerionware-com-ingressroute
+    tls:
+      secretName: middletest-centerionware
+      domains:
+        - main: "middletest.centerionware.com"
+          sans:
+            - "middletest.centerionware.com"
+            - "*.middletest.centerionware.com"
+    routes:
+      - kind: Rule
+        match: Host(`invoice-ninja.middletest.centerionware.com`) && PathPrefix(`/`)
+        services:
+          - type: ExternalName
+            name: middletest-routing-com-service
+            externalName: middletest.centerionware.lan
+            port: 805
+            scheme: http
+        middlewares: []
 
 
 middlewares:
@@ -263,67 +750,56 @@ middlewares:
     spec:
       basicAuth:
         secret: resume-secret
-
   - name: alpine-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://alpine-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/alpine-runner.sh"
-
   - name: build-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://build-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/build-runner.sh"
-
   - name: cloud-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://cloud-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/cloud-runner.sh"
-
   - name: sixcloud-runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://sixcloud-runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/cloud-runner6.sh"
-
   - name: kiosk-redirectregex
     spec:
       redirectRegex:
         regex: "^https://kiosk.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/kiosk.sh"
-
   - name: notes-redirectregex
     spec:
       redirectRegex:
         regex: "^https://notes.centerionware.com"
         replacement: "https://nextcloud.centerionware.com/index.php/apps/notes"
-
   - name: www-redirectregex
     spec:
       redirectRegex:
         regex: "^https://www.centerionware.com"
         replacement: "https://centerionware.com"
-
   - name: onboarding-redirectregex
     spec:
       redirectRegex:
         regex: "^https://onboarding.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/init.sh"
-
   - name: runner-redirectregex
     spec:
       redirectRegex:
         regex: "^https://runner.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/runner.sh"
-
   - name: sshkey-redirectregex
     spec:
       redirectRegex:
         regex: "^https://sshkey.centerionware.com"
         replacement: "https://gitlab.centerionware.com/onboarding/initialize-vm/-/raw/main/ssh_key"
-
   - name: helpdesk-redirectregex
     spec:
       redirectRegex:
@@ -338,7 +814,6 @@ middlewares:
         browserXssFilter: true
         contentTypeNosniff: true
         referrerPolicy: "no-referrer"
-
   - name: search-xng-search-centerionware-com-searxng-headers
     spec:
       headers:
@@ -348,8 +823,7 @@ middlewares:
             upgrade-insecure-requests; default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self' https://github.com/searxng/searxng/issues/new; font-src 'self'; frame-ancestors 'self'; base-uri 'self'; connect-src 'self' https://overpass-api.de; img-src 'self' data: https://*.tile.openstreetmap.org; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com https://www.deezer.com https://www.mixcloud.com https://w.soundcloud.com https://embed.spotify.com"
           Permissions-Policy: >-
             accelerometer=(),ambient-light-sensor=(),autoplay=(),camera=(),encrypted-media=(),focus-without-user-activation=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),speaker=(),sync-xhr=(),usb=(),vr=()
-
-  - name: authentik
+  - name: authentik  
     spec:
       forwardAuth:
         address: "http://ak-outpost-all-proxy-outpost.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/traefik"
@@ -367,3 +841,11 @@ middlewares:
           - X-authentik-meta-provider
           - X-authentik-meta-app
           - X-authentik-meta-version
+  - name: dashboard-vm-forwarded-proto
+    spec: 
+      headers:
+        customResponseHeaders:
+          X-Forwarded-Proto: https,wss
+
+
+

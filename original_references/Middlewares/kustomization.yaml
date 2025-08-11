@@ -1,7 +1,0 @@
-namePrefix: kustomize-
-resources:
-- authentik-middleware.yml
-- redirects.yml
-- search_middlewares.yml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
