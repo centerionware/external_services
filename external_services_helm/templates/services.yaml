@@ -9,7 +9,7 @@
   {{- /* Build port name as: serviceName-port-targetPort, e.g. mysvc-6000-6000 */ -}}
   {{- $portNameRaw := printf "%s-%d-%d" $svc.name $svc.port $svc.targetPort }}
   {{- /* Kubernetes port names must be <=15 chars, lowercase, no trailing dash */ -}}
-  {{- $portName := $portNameRaw | trunc 15 | lower | trimSuffix "-" }}
+  {{- $portName := $portNameRaw lower | trimSuffix "-" }}
 
   {{- $key := printf "%s/%s" $ns $svc.name }}
 
