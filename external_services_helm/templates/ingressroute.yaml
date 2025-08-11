@@ -28,7 +28,7 @@ spec:
           passHostHeader: true
           {{- end }}
           {{- if .insecureSkipVerify }}
-          serversTransport: {{ printf "%s-transport" .name }}
+          serversTransport: {{ printf "%s-transport" .name }}@kubernetescrd
           {{- end }}
           scheme: {{ default "http" .scheme }}
       {{- end }}
