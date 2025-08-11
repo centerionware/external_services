@@ -2,4 +2,6 @@ middlewares: []
 ingressRoutes: []
 classicIngresses: []
 certificates: []
-
+global:
+  default_entrypoints:
+  - websecure

@@ -1,3 +1,5 @@
+{{- $defaultEntryPoints := .Values.global.default_entrypoints }}
+
 {{- range .Values.ingressRoutes }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -6,8 +8,13 @@ metadata:
   namespace: {{ default $.Release.Namespace .namespace }}
 spec:
   entryPoints:
-  {{- range default (list "web") .entryPoints }}
+  {{- range $defaultEntryPoints }}
     - {{ . }}
+  {{- end }}
+  {{- if .entrypoints }}
+  {{- range .entrypoints }}
+    - {{ . }}
+  {{- end }}
   {{- end }}
   routes:
   {{- range .routes }}
