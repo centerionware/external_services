@@ -35,6 +35,7 @@ spec:
       middlewares:
       {{- range .middlewares }}
         - name: {{ . }}
+        - namespace: {{ default $.Release.Namespace .namespace }}
       {{- end }}
   {{- end }}
   {{- if .tls }}
