@@ -9,14 +9,14 @@
   {{- /* default targetPort to port if missing */ -}}
   {{- $targetPort := default $svc.port $svc.targetPort }}
 
-  {{- /* Build port name as: serviceName-port-targetPort, e.g. mysvc-6000-6000 */ -}}
+  {{- /* Build port name as: serviceName-port-targetPort */ -}}
   {{- $portNameRaw := printf "%s-%s-%s" $svc.name (toString $svc.port) (toString $targetPort) }}
   {{- $portName := $portNameRaw | lower | trimSuffix "-" }}
 
   {{- $key := printf "%s/%s" $ns $svc.name }}
 
   {{- if not (hasKey $svcMap $key) }}
-    {{- $_ := set $svcMap $key (dict "name" $svc.name "namespace" $ns "externalName" $svc.externalName "ports" (list)) }}
+    {{- $_ := set $svcMap $key (dict "name" $svc.name "namespace" $ns "externalName" $svc.externalName "ports" (list) "insecureSkipVerify" false) }}
   {{- end }}
 
   {{- $existingSvc := index $svcMap $key }}
@@ -32,8 +32,14 @@
   {{- if not $exists }}
     {{- $ports = append $ports (dict "port" $svc.port "targetPort" $targetPort "name" $portName) }}
     {{- $_ := set $existingSvc "ports" $ports }}
-    {{- $_ := set $svcMap $key $existingSvc }}
   {{- end }}
+
+  {{- /* Merge insecureSkipVerify: if any instance has it true, keep it true */ -}}
+  {{- if $svc.insecureSkipVerify }}
+    {{- $_ := set $existingSvc "insecureSkipVerify" true }}
+  {{- end }}
+
+  {{- $_ := set $svcMap $key $existingSvc }}
 {{- end }}
 
 {{- /* Collect from ingressRoutes */ -}}
@@ -60,6 +66,10 @@
 apiVersion: v1
 kind: Service
 metadata:
+  {{- if $svc.insecureSkipVerify }}
+  annotations:
+    traefik.ingress.kubernetes.io/service.serverstransport: {{ $svc.namespace }}-{{ $svc.namespace }}-insecureSkipVerify@kubernetescrd
+  {{- end }}
   name: {{ $svc.name }}
   namespace: {{ $svc.namespace }}
 spec:
@@ -71,5 +81,4 @@ spec:
       port: {{ .port }}
       targetPort: {{ .targetPort }}
     {{- end }}
-
 {{- end }}

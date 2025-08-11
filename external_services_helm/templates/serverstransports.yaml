@@ -2,14 +2,18 @@
 
 {{- range .Values.ingressRoutes }}
   {{- $ns := default $.Release.Namespace .namespace }}
+  {{- $needsTransport := false }}
   {{- range .routes }}
     {{- range .services }}
       {{- if .insecureSkipVerify }}
-        {{- $tname := printf "%s-transport" .name }}
-        {{- if not (hasKey $transports $tname) }}
-          {{- $_ := set $transports $tname (dict "name" $tname "namespace" $ns "insecureSkipVerify" true "serverName" (default "" .serverName)) }}
-        {{- end }}
+        {{- $needsTransport = true }}
       {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if $needsTransport }}
+    {{- $tname := printf "%s-insecureSkipVerify" $ns }}
+    {{- if not (hasKey $transports $tname) }}
+      {{- $_ := set $transports $tname (dict "name" $tname "namespace" $ns "insecureSkipVerify" true) }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -21,9 +25,6 @@ metadata:
   name: {{ $t.name }}
   namespace: {{ $t.namespace }}
 spec:
-{{- if $t.serverName }}
-  serverName: {{ $t.serverName }}
-{{- end }}
   insecureSkipVerify: {{ $t.insecureSkipVerify }}
 ---
 {{- end }}

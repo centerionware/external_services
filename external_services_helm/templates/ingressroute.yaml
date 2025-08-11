@@ -28,7 +28,7 @@ spec:
           passHostHeader: true
           {{- end }}
           {{- if .insecureSkipVerify }}
-          serversTransport: {{ printf "%s-transport" .name  }}
+          serversTransport: {{ printf "%s-insecureSkipVerify" (default $.Release.Namespace .namespace) }}
           {{- end }}
           scheme: {{ default "http" .scheme }}
       {{- end }}
