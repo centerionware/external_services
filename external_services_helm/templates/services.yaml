@@ -6,8 +6,25 @@
   {{- range .routes }}
     {{- range .services }}
       {{- $key := printf "%s/%s" $ns .name }}
+
       {{- if not (hasKey $services $key) }}
-        {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "port" .port) }}
+        {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "ports" (list)) }}
+      {{- end }}
+
+      {{- $svc := index $services $key }}
+      {{- $ports := get $svc "ports" }}
+
+      {{- $exists := false }}
+      {{- range $p := $ports }}
+        {{- if eq $p.port .port }}
+          {{- $exists = true }}
+        {{- end }}
+      {{- end }}
+
+      {{- if not $exists }}
+        {{- $ports = append $ports (dict "port" .port "targetPort" .port) }}
+        {{- $_ := set $svc "ports" $ports }}
+        {{- $_ := set $services $key $svc }}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -18,14 +35,32 @@
   {{- $ns := default $.Release.Namespace .namespace }}
   {{- range .services }}
     {{- $key := printf "%s/%s" $ns .name }}
+
     {{- if not (hasKey $services $key) }}
-      {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "port" .port) }}
+      {{- $_ := set $services $key (dict "name" .name "namespace" $ns "externalName" .externalName "ports" (list)) }}
+    {{- end }}
+
+    {{- $svc := index $services $key }}
+    {{- $ports := get $svc "ports" }}
+
+    {{- $exists := false }}
+    {{- range $p := $ports }}
+      {{- if eq $p.port .port }}
+        {{- $exists = true }}
+      {{- end }}
+    {{- end }}
+
+    {{- if not $exists }}
+      {{- $ports = append $ports (dict "port" .port "targetPort" .port) }}
+      {{- $_ := set $svc "ports" $ports }}
+      {{- $_ := set $services $key $svc }}
     {{- end }}
   {{- end }}
 {{- end }}
 
-{{- /* Output all unique Services */ -}}
+{{- /* Output all unique Services with all ports */ -}}
 {{- range $key, $svc := $services }}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -35,7 +70,8 @@ spec:
   type: ExternalName
   externalName: {{ $svc.externalName }}
   ports:
-    - port: {{ $svc.port }}
-      targetPort: {{ $svc.port }}
----
+    {{- range $svc.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+    {{- end }}
 {{- end }}
