@@ -3,7 +3,12 @@
 {{- range .Values.ingressRoutes }}
 {{- $ns := default $.Release.Namespace .namespace }}
 {{- $secretName := .secretName }}
-{{- $cert := first (where $.Values.certificates "secretName" $secretName) }}
+{{- $cert := dict }}
+{{- range $.Values.certificates }}
+  {{- if eq .secretName $secretName }}
+    {{- $cert = . }}
+  {{- end }}
+{{- end }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
