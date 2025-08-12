@@ -7,11 +7,11 @@ metadata:
   namespace: {{ default $.Release.Namespace .namespace }}
 spec:
   secretName: {{ .secretName }}
-  {{ if and .reflection-allowed-namespaces (kindIs "slice" .reflection-allowed-namespaces) }}
+  {{- if and .reflectionAllowedNamespaces (kindIs "slice" .reflectionAllowedNamespaces) }}
   secretTemplate:
     annotations:
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: {{ join "," .reflection-allowed-namespaces }}
+      reflector.v1.k8s.emberstack.com/reflectionAllowedNamespaces: {{ join "," .reflectionAllowedNamespaces }}
   {{- end }}
   issuerRef:
     name: {{ .issuerRef.name }}
