@@ -1,12 +1,19 @@
 
 Requirements: 
-* cert-manager already set up and at least a cluster-issuer, 
+* cert-manager already set up and at least a cluster-issuer
 * traefik
+* flux or argocd (Optional but highly recommended)
 
 Issue that caused it:
- the --serversTransport.insecureSkipVerify global option no longer works on newer versions of traefik, it was replaced and now the way seems to be to define a serverstransport crd and an ingressroute. 
+ the --serversTransport.insecureSkipVerify global option no longer works on newer versions of traefik, it was replaced and now the way seems to be to define a serverstransport crd and an ingressroute. I had to go through pretty much every ingress anyway to fix it even had I known how to before.
 
-Deployment: Best used with ArgoCD. Just point it to this repository and select the external_services_helm directory. Then use a customized values.yaml.
+## Deployment
+Deployment: Best used with Flux or ArgoCD. 
+
+Just FORK this repository, then point Flux/ArgoCD to *YOUR FORK* and select the external_services_helm directory. Then use a customized values.yaml.
+
+### Why your fork?
+Security and peace of mind. if I make changes you'll have to review them before putting something into your cluster. Sure you could automate it and have it pull but that breaks the security model. It's just best practice. if you really want to point to this repository be my guest. 
 
 It generates ExternalName services, middlewares, servertransports, certificates, and IngressRoutes.
 
@@ -15,13 +22,13 @@ Two working examples are provided to show intended usage.
 ## What is it?
 A compose for your kubernetes Traefik Ingress.
 
-### Why? 
+## Why? 
 
 Defining ingresses almost became a full time job. All the seperate parts required for it to work to point to a service outside of the kubernetes was cumbersone, lots of redundant typing and specifying things over and over. This simplifies things so one smaller entry can define everything and the implimentation details are then generated from the specification.
 
 This reduces the time it takes to create an ingress from 20+ minutes to 3-5 minutes. And if traefik decides to change their spec the templates can be updated to fix all of the IngressRoutes quickly. 
 
-### So far
+## So far
 
 From 39 lines of yaml for the simplest kubernetes external service to 10 lines (+9 for the certificate, but the certificates can often be re-used across multiple ingressRoutes)
 
@@ -45,6 +52,6 @@ And this generates all the manifests for all the things.
 
 Technically the `type: ExternalName` isn't used either, they're all ExternalName services so that's one more line that can be removed.
 
-### Roadmap
+## Roadmap
 
 I'd like to make this work with regular Ingresses with all the features that this already supports. No timeline, may never get to it.
