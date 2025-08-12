@@ -22,4 +22,18 @@ spec:
     - {{ . | quote }}
 {{- end }}
 ---
+{{- if .createReflectedSecrets }}
+  {{- range .createReflectedSecrets }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .secretName }}
+  namespace: {{ .namespace }}
+  annotations:
+    reflector.v1.k8s.emberstack.com/reflects: "{{ default $.Release.Namespace $.namespace }}/{{ $.secretName }}"
+type: kubernetes.io/tls
+data: {}
+  {{- end }}
+{{- end }}
 {{- end }}
