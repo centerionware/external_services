@@ -58,7 +58,7 @@ I'd like to make this work with regular Ingresses with all the features that thi
 
 
 # Latest Features
-Added Reflector support. [Add Kubernetes-Reflector](https://github.com/emberstack/kubernetes-reflector) to your cluster, then the reflector can mirror a single certificate to many sources, and it updates quick.
+Added Reflector support. [Add Kubernetes-Reflector](https://github.com/emberstack/kubernetes-reflector) to your cluster, then the reflector can mirror a single certificate to many destinataions.
 
 ```yml
 certificates:
