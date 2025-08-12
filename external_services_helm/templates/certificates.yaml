@@ -9,7 +9,7 @@ spec:
   secretName: {{ .secretName }}
   {{- if .reflection-allowed-namespaces }}
   {{- if not (kindIs "slice" .reflection-allowed-namespaces) }}
-  {{- fail "reflection-allowed-namespaces must be an array" }}
+  {{ fail "reflection-allowed-namespaces must be an array" }}
   {{- end }}
   secretTemplate:
     annotations:
