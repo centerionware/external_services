@@ -33,6 +33,8 @@ metadata:
   name: {{ .secretName }}
   namespace: {{ .namespace }}
   annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/compare-options: IgnoreDifferences
     reflector.v1.k8s.emberstack.com/reflects: "{{ $certNamespace }}/{{ $certSecretName }}"
 type: Opaque
 data: {}
